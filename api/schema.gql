@@ -1,0 +1,15 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Mutation {
+  ping: String!
+}
+
+type Query {
+  health: String!
+}
+
+type Subscription {
+  pinged: String!
+}
