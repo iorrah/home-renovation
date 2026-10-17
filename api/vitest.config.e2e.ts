@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { TEST_DATABASE_URL } from './test/support/test-database.js';
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
@@ -6,5 +7,10 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['test/**/*.e2e-spec.ts'],
+    globalSetup: ['test/support/global-setup.ts'],
+    // Overrides api/.env inside test workers, so tests never touch the dev database.
+    env: { NODE_ENV: 'test', DATABASE_URL: TEST_DATABASE_URL },
+    // All e2e files share one database, so run them one at a time.
+    fileParallelism: false,
   },
 });
