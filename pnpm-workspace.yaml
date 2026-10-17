@@ -1,0 +1,4 @@
+packages: [api, app]
+minimumReleaseAge: 20160
+saveExact: true
+engineStrict: true

@@ -1,0 +1,92 @@
+# ================================
+# Dependencies
+# ================================
+node_modules/
+.pnpm-store/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ================================
+# Build outputs
+# ================================
+dist/
+build/
+.out/
+.next/
+.turbo/
+
+# ================================
+# Environment files
+# ================================
+.env
+.env.*
+!.env.example
+
+# ================================
+# Logs
+# ================================
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ================================
+# Coverage & Test artifacts
+# ================================
+coverage/
+.nyc_output
+
+# ================================
+# OS / Editor
+# ================================
+.DS_Store
+.idea/
+*.swp
+.project
+.classpath
+.settings/
+.c9/
+*.launch
+*.sublime-workspace
+
+# ================================
+# Typescript
+# ================================
+*.tsbuildinfo
+next-env.d.ts
+
+# ================================
+# Prisma
+# ================================
+prisma/migrations/dev.db
+prisma/migrations/*.db
+
+# ================================
+# Docker
+# ================================
+docker_data/
+docker/postgres_data/
+**/postgres_data/
+
+# ================================
+# Vercel
+# ================================
+.vercel
+
+# ================================
+# Runtime / temp
+# ================================
+tmp/
+temp/
+.temp
+.tmp
+pids
+*.pid
+*.pid.lock
+*.seed
