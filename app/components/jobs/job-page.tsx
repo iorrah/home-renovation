@@ -1,15 +1,16 @@
 'use client';
 
-import { ArrowLeftIcon, MessageSquareIcon } from 'lucide-react';
+import { ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApiError } from '@/lib/api';
 import { useJob } from '@/lib/jobs';
 import { useCurrentUser } from '@/lib/session';
+import { ChatCard } from './chat-card';
 import { HistoryCard } from './history-card';
 import { HomeownersCard } from './homeowners-card';
 import { JobDetailsCard } from './job-details-card';
+import { ReportCard } from './report-card';
 import { StatusBadge } from './status-badge';
 
 /**
@@ -59,18 +60,10 @@ export function JobPage({ jobId }: { jobId: string }) {
         <div className="space-y-6">
           <JobDetailsCard job={job.data} canEdit={canEdit} />
           <HomeownersCard job={job.data} canEdit={canEdit} />
+          {canEdit && <ReportCard jobId={job.data.id} />}
           <HistoryCard job={job.data} canEdit={canEdit} />
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MessageSquareIcon className="size-5" /> Messages
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Chat arrives in a later step.
-          </CardContent>
-        </Card>
+        <ChatCard jobId={job.data.id} />
       </div>
     </div>
   );
