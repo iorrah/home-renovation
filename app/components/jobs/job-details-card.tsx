@@ -57,6 +57,7 @@ export function JobDetailsCard({ job, canEdit }: { job: Job; canEdit: boolean })
           if (error instanceof ApiError && error.code === 'CONFLICT') {
             toast.error('Someone else changed this job. Showing the latest version.');
             setEditing(false);
+            // A prefix match: refetches the job and its history (['jobs', id, 'history']).
             void queryClient.invalidateQueries({ queryKey: jobKeys.detail(job.id) });
           } else {
             toast.error(error.message);

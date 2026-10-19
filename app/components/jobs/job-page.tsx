@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ApiError } from '@/lib/api';
 import { useJob } from '@/lib/jobs';
 import { useCurrentUser } from '@/lib/session';
+import { HistoryCard } from './history-card';
 import { HomeownersCard } from './homeowners-card';
 import { JobDetailsCard } from './job-details-card';
 import { StatusBadge } from './status-badge';
@@ -58,6 +59,7 @@ export function JobPage({ jobId }: { jobId: string }) {
         <div className="space-y-6">
           <JobDetailsCard job={job.data} canEdit={canEdit} />
           <HomeownersCard job={job.data} canEdit={canEdit} />
+          <HistoryCard job={job.data} canEdit={canEdit} />
         </div>
         <Card>
           <CardHeader>
