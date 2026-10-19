@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "engines": {
-    "node": ">=24.11"
+    "node": ">=24.15"
   },
   "scripts": {
     "dev:api": "pnpm --filter api start:dev",
