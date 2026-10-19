@@ -85,3 +85,10 @@ function subscribe(listener: () => void) {
 export function useSession(): Session | null | undefined {
   return useSyncExternalStore(subscribe, getSession, () => undefined);
 }
+
+/** The logged-in user, for pages inside the (app) route group, where the guard ensures one. */
+export function useCurrentUser(): User {
+  const session = useSession();
+  if (!session) throw new Error('useCurrentUser used outside the authenticated layout');
+  return session.user;
+}
