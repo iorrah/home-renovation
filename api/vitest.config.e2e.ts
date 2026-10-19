@@ -9,7 +9,11 @@ export default defineConfig({
     include: ['test/**/*.e2e-spec.ts'],
     globalSetup: ['test/support/global-setup.ts'],
     // Overrides api/.env inside test workers, so tests never touch the dev database.
-    env: { NODE_ENV: 'test', DATABASE_URL: TEST_DATABASE_URL },
+    env: {
+      NODE_ENV: 'test',
+      DATABASE_URL: TEST_DATABASE_URL,
+      JWT_SECRET: 'test-only-secret-0123456789abcdef0123456789',
+    },
     // All e2e files share one database, so run them one at a time.
     fileParallelism: false,
   },
