@@ -195,7 +195,9 @@ describe('Jobs (e2e)', () => {
         update(token.carlos, job.id, { description: 'Renamed' }),
       ]);
 
-      const versions = [a.body.data.updateJob.version, b.body.data.updateJob.version].sort((x, y) => x - y);
+      const versions = [a.body.data.updateJob.version, b.body.data.updateJob.version].sort(
+        (x, y) => x - y,
+      );
       expect(versions).toEqual([2, 3]);
       const final = await gql(
         t.app,
