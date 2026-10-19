@@ -22,11 +22,11 @@ export function AppHeader({ user }: { user: User }) {
   return (
     <header className="border-b">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-        <Link href="/jobs" className="font-semibold">
+        <Link href="/jobs" className="font-semibold whitespace-nowrap">
           Home Renovation
         </Link>
         <div className="flex items-center gap-3">
-          <span className="text-sm">{user.username}</span>
+          <span className="hidden text-sm sm:inline">{user.username}</span>
           <Badge variant="secondary">{ROLE_LABELS[user.role]}</Badge>
           <Button variant="outline" size="sm" onClick={logout}>
             <LogOutIcon />
