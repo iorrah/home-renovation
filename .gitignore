@@ -93,3 +93,6 @@ pids
 
 # Generated report PDFs
 storage/
+
+# Claude desktop app settings (dev server preview config)
+.claude/
