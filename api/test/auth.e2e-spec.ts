@@ -116,10 +116,14 @@ describe('Auth (e2e)', () => {
     });
 
     it('lets an anonymous connection run only public operations', async () => {
-      const result = (await queryOverWs()) as { errors?: { message: string }[] };
+      const result = (await queryOverWs()) as {
+        errors?: { message: string; extensions?: { code?: string } }[];
+      };
 
-      // graphql-ws sends errors without Apollo's formatting, so there is no extensions.code here.
-      expect(result.errors?.[0]?.message).toBe('Missing or invalid access token');
+      expect(result.errors?.[0]).toMatchObject({
+        message: 'Missing or invalid access token',
+        extensions: { code: 'UNAUTHENTICATED' }, // same code as over HTTP
+      });
     });
   });
 });
