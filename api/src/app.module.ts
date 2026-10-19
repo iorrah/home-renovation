@@ -1,25 +1,34 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_PIPE } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
-import { join } from 'node:path';
+import { AuthModule } from './auth/auth.module.js';
+import { AuthService } from './auth/auth.service.js';
 import { envSchema } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
+import { buildGraphQLConfig } from './graphql/graphql.config.js';
 import { HealthResolver } from './health/health.resolver.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validationSchema: envSchema }),
     DatabaseModule,
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    AuthModule,
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'schema.gql'),
-      sortSchema: true,
-      graphiql: true,
-      subscriptions: { 'graphql-ws': { path: '/graphql' } },
+      imports: [AuthModule],
+      inject: [AuthService],
+      useFactory: buildGraphQLConfig,
     }),
   ],
-  providers: [HealthResolver, { provide: 'PUB_SUB', useValue: new PubSub() }],
+  providers: [
+    // Registered here rather than in main.ts so e2e tests, which build AppModule directly,
+    // validate input exactly like the running server.
+    { provide: APP_PIPE, useValue: new ValidationPipe({ whitelist: true, transform: true }) },
+    HealthResolver,
+    { provide: 'PUB_SUB', useValue: new PubSub() },
+  ],
 })
 export class AppModule {}

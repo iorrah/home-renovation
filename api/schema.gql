@@ -2,14 +2,40 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthPayload {
+  """Send as "Authorization: Bearer <accessToken>"."""
+  accessToken: String!
+  user: User!
+}
+
+input LoginInput {
+  password: String!
+  username: String!
+}
+
 type Mutation {
+  login(input: LoginInput!): AuthPayload!
   ping: String!
 }
 
 type Query {
   health: String!
+
+  """The user the access token belongs to."""
+  me: User!
 }
 
 type Subscription {
   pinged: String!
+}
+
+type User {
+  id: ID!
+  role: UserRole!
+  username: String!
+}
+
+enum UserRole {
+  CONTRACTOR
+  HOMEOWNER
 }
