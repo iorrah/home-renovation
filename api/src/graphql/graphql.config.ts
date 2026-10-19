@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import type { AuthUser } from '../auth/auth-user.js';
 import { AuthService, extractBearerToken } from '../auth/auth.service.js';
 import type { GraphQLContext } from '../auth/request-context.js';
+import { formatGraphQLError } from './format-error.js';
 
 type WsExtra = { user?: AuthUser };
 
@@ -13,6 +14,7 @@ export function buildGraphQLConfig(auth: AuthService): ApolloDriverConfig {
     autoSchemaFile: join(process.cwd(), 'schema.gql'),
     sortSchema: true,
     graphiql: true,
+    formatError: formatGraphQLError,
     subscriptions: {
       'graphql-ws': {
         path: '/graphql',
