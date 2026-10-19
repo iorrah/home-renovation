@@ -11,7 +11,7 @@ import { REPORT_QUEUE_NAME } from './report-queue.js';
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) => ({
         connection: { url: config.get('REDIS_URL', { infer: true }) },
-        prefix: config.get('QUEUE_PREFIX', { infer: true }),
+        prefix: config.get('REDIS_PREFIX', { infer: true }),
       }),
     }),
     BullModule.registerQueue({ name: REPORT_QUEUE_NAME }),

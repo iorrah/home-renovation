@@ -3,7 +3,6 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
-import { PubSub } from 'graphql-subscriptions';
 import { AuthModule } from './auth/auth.module.js';
 import { AuthService } from './auth/auth.service.js';
 import { envSchema } from './config/env.js';
@@ -12,6 +11,7 @@ import { buildGraphQLConfig } from './graphql/graphql.config.js';
 import { HealthResolver } from './health/health.resolver.js';
 import { JobsModule } from './jobs/jobs.module.js';
 import { MessagesModule } from './messages/messages.module.js';
+import { PubSubModule } from './pubsub/pubsub.module.js';
 import { ReportsModule } from './reports/reports.module.js';
 
 @Module({
@@ -19,6 +19,7 @@ import { ReportsModule } from './reports/reports.module.js';
     ConfigModule.forRoot({ isGlobal: true, validationSchema: envSchema }),
     DatabaseModule,
     AuthModule,
+    PubSubModule,
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       imports: [AuthModule],
@@ -34,7 +35,6 @@ import { ReportsModule } from './reports/reports.module.js';
     // validate input exactly like the running server.
     { provide: APP_PIPE, useValue: new ValidationPipe({ whitelist: true, transform: true }) },
     HealthResolver,
-    { provide: 'PUB_SUB', useValue: new PubSub() },
   ],
 })
 export class AppModule {}

@@ -9,8 +9,8 @@ export const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN_SECONDS: z.coerce.number().int().positive().default(3600),
   REDIS_URL: z.url().default('redis://localhost:6379'),
-  // Namespaces the queue's Redis keys, so tests never share a queue with the dev worker.
-  QUEUE_PREFIX: z.string().default('bull'),
+  // Namespaces every Redis key and channel (queue, pub/sub), so tests never share them with dev.
+  REDIS_PREFIX: z.string().default('bull'),
   // Shared by the API (serves files) and the worker (writes them). Relative to the api/ folder.
   REPORTS_DIR: z.string().default('storage/reports'),
 });
