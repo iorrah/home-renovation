@@ -1,0 +1,45 @@
+name: home-renovation
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: renovation
+      POSTGRES_PASSWORD: renovation
+      POSTGRES_DB: renovation
+    ports: ['5432:5432']
+    volumes: [pgdata:/var/lib/postgresql]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U renovation -d renovation']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  postgres-test:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: renovation
+      POSTGRES_PASSWORD: renovation
+      POSTGRES_DB: renovation_test
+    ports: ['5433:5432']
+    tmpfs: [/var/lib/postgresql]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U renovation -d renovation_test']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:8-alpine
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    ports: ['6379:6379']
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:
+  redisdata:
