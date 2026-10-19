@@ -6,6 +6,8 @@ import { dirname } from 'node:path';
 import { finished } from 'node:stream/promises';
 import PDFDocument from 'pdfkit';
 import { DataSource } from 'typeorm';
+import { formatCents } from '../../common/money.js';
+import { describeDiff } from '../../history/describe-change.js';
 import { JobChange } from '../../history/job-change.entity.js';
 import { Job } from '../../jobs/job.entity.js';
 import { Message } from '../../messages/message.entity.js';
@@ -14,20 +16,7 @@ import { User } from '../../users/user.entity.js';
 /** Rows read per database round trip, so memory stays flat however long the job's history is. */
 const PAGE_SIZE = 500;
 
-const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-const formatCents = (cents: unknown) =>
-  typeof cents === 'number' ? money.format(cents / 100) : String(cents);
 const formatDate = (date: Date) => date.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
-
-/** ": cost $100.00 -> $150.00; status "PLANNING" -> "IN_PROGRESS"", or "" for no diff. */
-function describeDiff(change: JobChange): string {
-  const parts = Object.entries(change.diff).map(([field, { from, to }]) =>
-    field === 'costCents'
-      ? `cost ${formatCents(from)} -> ${formatCents(to)}`
-      : `${field} "${String(from)}" -> "${String(to)}"`,
-  );
-  return parts.length ? `: ${parts.join('; ')}` : '';
-}
 
 /**
  * Writes the full report for one job: summary, cost and status changes, every history entry,
@@ -121,7 +110,8 @@ export class ReportPdfGenerator {
           .fontSize(10)
           .text(
             `#${change.changeNumber}  ${formatDate(change.createdAt)}  ${change.type}` +
-              `  by ${change.responsibleUser.username}${describeDiff(change)}`,
+              `  by ${change.responsibleUser.username}` +
+              (Object.keys(change.diff).length ? `: ${describeDiff(change.diff)}` : ''),
           );
       }
       lastChangeNumber = changes[changes.length - 1].changeNumber;
