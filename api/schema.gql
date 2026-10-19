@@ -117,7 +117,6 @@ type Mutation {
   """Soft delete: hides the job but keeps its history."""
   deleteJob(id: ID!): Boolean!
   login(input: LoginInput!): AuthPayload!
-  ping: String!
 
   """Reapplies the edit undone most recently."""
   redoJobChange(
@@ -197,7 +196,10 @@ input SendMessageInput {
 }
 
 type Subscription {
-  pinged: String!
+  """
+  New messages on a job, as they are sent. Connect over WebSocket (graphql-transport-ws) with { authorization: "Bearer <token>" } in connectionParams.
+  """
+  messageAdded(jobId: ID!): Message!
 }
 
 input UpdateJobInput {
