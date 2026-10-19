@@ -5,10 +5,9 @@ import { LogOutIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { closeRealtimeClient } from '@/lib/realtime';
 import { clearSession } from '@/lib/session';
-import type { User } from '@/lib/types';
-
-export const ROLE_LABELS = { CONTRACTOR: 'Contractor', HOMEOWNER: 'Homeowner' } as const;
+import { ROLE_LABELS, type User } from '@/lib/types';
 
 export function AppHeader({ user }: { user: User }) {
   const queryClient = useQueryClient();
@@ -16,6 +15,7 @@ export function AppHeader({ user }: { user: User }) {
   function logout() {
     // Drop cached data too, so the next user to log in on this tab never sees it.
     queryClient.clear();
+    closeRealtimeClient();
     clearSession(); // the route guard then redirects to /login
   }
 

@@ -5,3 +5,8 @@ export type User = {
   username: string;
   role: UserRole;
 };
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  CONTRACTOR: 'Contractor',
+  HOMEOWNER: 'Homeowner',
+};
