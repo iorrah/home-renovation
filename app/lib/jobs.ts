@@ -39,7 +39,7 @@ export const NEXT_STATUSES: Record<JobStatus, JobStatus[]> = {
   CANCELED: ['PLANNING'],
 };
 
-const JOB_FIELDS = `
+export const JOB_FIELDS = `
   id description address status costCents version canUndo canRedo createdAt updatedAt
   contractor { id username }
   homeowners { id username }`;
@@ -55,6 +55,7 @@ export type JobInput = {
 export const jobKeys = {
   all: ['jobs'] as const,
   detail: (id: string) => ['jobs', id] as const,
+  history: (id: string) => ['jobs', id, 'history'] as const,
 };
 
 export function useJobs() {
@@ -73,12 +74,16 @@ export function useJob(id: string) {
   });
 }
 
-/** After a change, show the job the server returned and refresh the list in the background. */
-function useStoreJob() {
+/**
+ * After a change, show the job the server returned, and refresh the list and the job's history
+ * in the background (every change adds a history entry).
+ */
+export function useStoreJob() {
   const queryClient = useQueryClient();
   return (job: Job) => {
     queryClient.setQueryData(jobKeys.detail(job.id), job);
     void queryClient.invalidateQueries({ queryKey: jobKeys.all, exact: true });
+    void queryClient.invalidateQueries({ queryKey: jobKeys.history(job.id), exact: true });
   };
 }
 
