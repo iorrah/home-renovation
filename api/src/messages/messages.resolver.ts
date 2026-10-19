@@ -1,5 +1,5 @@
 import { ParseUUIDPipe } from '@nestjs/common';
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Int, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import type { AuthUser } from '../auth/auth-user.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { SendMessageInput } from './dto/send-message.input.js';
@@ -32,5 +32,19 @@ export class MessagesResolver {
     @Args('input') input: SendMessageInput,
   ): Promise<Message> {
     return this.messagesService.send(user, input.jobId, input.body);
+  }
+
+  @Subscription(() => MessageModel, {
+    description:
+      'New messages on a job, as they are sent. Connect over WebSocket (graphql-transport-ws) ' +
+      'with { authorization: "Bearer <token>" } in connectionParams.',
+    // The published event already has the Message shape, so it is returned as it is.
+    resolve: (message: MessageModel) => message,
+  })
+  messageAdded(
+    @CurrentUser() user: AuthUser,
+    @Args('jobId', { type: () => ID }, uuid) jobId: string,
+  ): Promise<AsyncIterableIterator<MessageModel>> {
+    return this.messagesService.subscribe(user, jobId);
   }
 }

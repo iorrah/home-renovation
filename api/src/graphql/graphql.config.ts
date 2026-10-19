@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import type { AuthUser } from '../auth/auth-user.js';
 import { AuthService, extractBearerToken } from '../auth/auth.service.js';
 import type { GraphQLContext } from '../auth/request-context.js';
-import { formatGraphQLError } from './format-error.js';
+import { formatExecutionError, formatGraphQLError } from './format-error.js';
 
 type WsExtra = { user?: AuthUser };
 
@@ -28,6 +28,13 @@ export function buildGraphQLConfig(auth: AuthService): ApolloDriverConfig {
           (ctx.extra as WsExtra).user = user;
           return true;
         },
+        // Give WebSocket errors the same codes and redaction as HTTP ones: formatError above only
+        // runs for HTTP. This covers errors while running an operation, including a subscription
+        // refused at start (not logged in, not on the job).
+        onNext: (_ctx, _id, _payload, _args, result) =>
+          result.errors
+            ? { ...result, errors: result.errors.map(formatExecutionError) }
+            : undefined,
       },
     },
     // Called once per operation. HTTP requests arrive as { req }; WebSocket operations arrive as

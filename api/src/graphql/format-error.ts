@@ -1,4 +1,5 @@
-import type { GraphQLFormattedError } from 'graphql';
+import { HttpException } from '@nestjs/common';
+import type { GraphQLError, GraphQLFormattedError } from 'graphql';
 
 /** Stable, documented error codes for clients, keyed by the HTTP status Nest exceptions carry. */
 const CODE_BY_STATUS: Record<number, string> = {
@@ -46,4 +47,31 @@ export function formatGraphQLError(error: GraphQLFormattedError): GraphQLFormatt
     path: error.path,
     extensions: { code, ...details },
   };
+}
+
+/**
+ * Same rules for errors sent over WebSocket. graphql-ws does not run Apollo's formatting, so it
+ * hands over raw GraphQLErrors; this reads the Nest exception from `originalError` itself.
+ */
+export function formatExecutionError(error: GraphQLError): GraphQLFormattedError {
+  const formatted = error.toJSON();
+  const original = error.originalError;
+
+  if (original instanceof HttpException) {
+    const response = original.getResponse();
+    const message =
+      typeof response === 'object' ? (response as { message?: unknown }).message : response;
+    return formatGraphQLError({
+      ...formatted,
+      extensions: {
+        ...formatted.extensions,
+        originalError: { statusCode: original.getStatus(), message },
+      },
+    });
+  }
+  // No original error: GraphQL itself rejected the operation (bad variables, unknown field).
+  if (!original) {
+    return { ...formatted, extensions: { code: 'BAD_USER_INPUT' } };
+  }
+  return formatGraphQLError(formatted); // unexpected: generic message, no details
 }

@@ -30,6 +30,12 @@ export class JobModel {
   @Field(() => [UserModel])
   homeowners: UserModel[];
 
+  @Field({ description: 'Whether undoJobChange has an edit to reverse.' })
+  canUndo: boolean;
+
+  @Field({ description: 'Whether redoJobChange has an undone edit to reapply.' })
+  canRedo: boolean;
+
   @Field()
   createdAt: Date;
 
