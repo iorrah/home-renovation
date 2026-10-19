@@ -14,4 +14,13 @@ export class UsersService {
   findById(id: string): Promise<User | null> {
     return this.users.findOneBy({ id });
   }
+
+  findHomeownersOfJob(jobId: string): Promise<User[]> {
+    return this.users
+      .createQueryBuilder('user')
+      .innerJoin('job_homeowners', 'member', 'member.user_id = user.id')
+      .where('member.job_id = :jobId', { jobId })
+      .orderBy('user.username')
+      .getMany();
+  }
 }
