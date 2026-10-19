@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: api
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: renovation
+          POSTGRES_PASSWORD: renovation
+          POSTGRES_DB: renovation_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U renovation -d renovation_test"
+          --health-interval 2s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis:8-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s --health-timeout 3s --health-retries 20
+
+    env:
+      # The CLI scripts (migration:check) read DATABASE_URL; e2e tests read TEST_DATABASE_URL.
+      DATABASE_URL: postgres://renovation:renovation@localhost:5432/renovation_test
+      TEST_DATABASE_URL: postgres://renovation:renovation@localhost:5432/renovation_test
+      JWT_SECRET: ci-only-secret-0123456789abcdef0123456789
+      REDIS_URL: redis://localhost:6379
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4 # reads the pnpm version from package.json "packageManager"
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm exec prettier --check src test
+      - run: pnpm exec tsc --noEmit -p tsconfig.json
+      - run: pnpm test
+      - run: pnpm test:e2e
+      # Runs after e2e, which migrates the database: fails if an entity changed without a migration.
+      - run: pnpm migration:check
