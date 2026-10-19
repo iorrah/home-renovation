@@ -2,6 +2,7 @@ import { NotFoundException, ParseUUIDPipe } from '@nestjs/common';
 import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import type { AuthUser } from '../auth/auth-user.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
+import { HistoryService } from '../history/history.service.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { UserRole } from '../users/user.entity.js';
 import { UserModel } from '../users/user.model.js';
@@ -20,6 +21,7 @@ export class JobsResolver {
   constructor(
     private readonly jobsService: JobsService,
     private readonly users: UsersService,
+    private readonly history: HistoryService,
   ) {}
 
   @Query(() => [JobModel], { description: 'Jobs you own (contractor) or belong to (homeowner).' })
@@ -92,5 +94,15 @@ export class JobsResolver {
   @ResolveField(() => [UserModel])
   homeowners(@Parent() job: Job): Promise<UserModel[]> {
     return this.jobsService.homeownersOf(job.id);
+  }
+
+  @ResolveField(() => Boolean)
+  canUndo(@Parent() job: Job): Promise<boolean> {
+    return this.history.canUndo(job.id);
+  }
+
+  @ResolveField(() => Boolean)
+  canRedo(@Parent() job: Job): Promise<boolean> {
+    return this.history.canRedo(job.id);
   }
 }
