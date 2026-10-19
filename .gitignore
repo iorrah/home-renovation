@@ -90,3 +90,6 @@ pids
 *.pid
 *.pid.lock
 *.seed
+
+# Generated report PDFs
+storage/

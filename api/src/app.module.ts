@@ -10,6 +10,9 @@ import { envSchema } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
 import { buildGraphQLConfig } from './graphql/graphql.config.js';
 import { HealthResolver } from './health/health.resolver.js';
+import { JobsModule } from './jobs/jobs.module.js';
+import { MessagesModule } from './messages/messages.module.js';
+import { ReportsModule } from './reports/reports.module.js';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { HealthResolver } from './health/health.resolver.js';
       inject: [AuthService],
       useFactory: buildGraphQLConfig,
     }),
+    JobsModule,
+    MessagesModule,
+    ReportsModule,
   ],
   providers: [
     // Registered here rather than in main.ts so e2e tests, which build AppModule directly,

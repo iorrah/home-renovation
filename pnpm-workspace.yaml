@@ -4,3 +4,4 @@ saveExact: true
 engineStrict: true
 allowBuilds:
   '@apollo/protobufjs': false
+  msgpackr-extract: false

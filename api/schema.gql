@@ -8,25 +8,133 @@ type AuthPayload {
   user: User!
 }
 
+input CreateJobInput {
+  address: String!
+  costCents: Int! = 0
+  description: String!
+  status: JobStatus
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Job {
+  """Street address of the renovation."""
+  address: String!
+  contractor: User!
+
+  """Cost in cents, e.g. 150000 for $1,500.00."""
+  costCents: Int!
+  createdAt: DateTime!
+  description: String!
+  homeowners: [User!]!
+  id: ID!
+  status: JobStatus!
+  updatedAt: DateTime!
+
+  """Increases on every change. Send it back as expectedVersion."""
+  version: Int!
+}
+
+enum JobStatus {
+  CANCELED
+  COMPLETED
+  IN_PROGRESS
+  PLANNING
+}
+
 input LoginInput {
   password: String!
   username: String!
 }
 
+type Message {
+  author: User!
+  body: String!
+  createdAt: DateTime!
+  id: ID!
+  jobId: ID!
+}
+
 type Mutation {
+  addHomeowner(jobId: ID!, username: String!): Job!
+  createJob(input: CreateJobInput!): Job!
+
+  """Soft delete: hides the job but keeps its history."""
+  deleteJob(id: ID!): Boolean!
   login(input: LoginInput!): AuthPayload!
   ping: String!
+  removeHomeowner(homeownerId: ID!, jobId: ID!): Job!
+
+  """
+  Starts building a PDF report in the background. Poll reportExport for status.
+  """
+  requestReport(jobId: ID!): ReportExport!
+  sendMessage(input: SendMessageInput!): Message!
+  updateJob(id: ID!, input: UpdateJobInput!): Job!
 }
 
 type Query {
   health: String!
+  job(id: ID!): Job!
+
+  """Jobs you own (contractor) or belong to (homeowner)."""
+  jobs: [Job!]!
 
   """The user the access token belongs to."""
   me: User!
+
+  """
+  Oldest first. Pass "after" to get only newer messages. Max 200 per page.
+  """
+  messages(after: ID, jobId: ID!, limit: Int! = 50): [Message!]!
+  reportExport(id: ID!): ReportExport!
+}
+
+type ReportExport {
+  createdAt: DateTime!
+
+  """
+  When DONE: GET this path with your Authorization header to download the PDF.
+  """
+  downloadPath: String
+
+  """Why the export failed, when FAILED."""
+  error: String
+  id: ID!
+  jobId: ID!
+  status: ReportExportStatus!
+  updatedAt: DateTime!
+}
+
+enum ReportExportStatus {
+  DONE
+  FAILED
+  PROCESSING
+  QUEUED
+}
+
+input SendMessageInput {
+  body: String!
+  jobId: ID!
 }
 
 type Subscription {
   pinged: String!
+}
+
+input UpdateJobInput {
+  address: String
+  costCents: Int
+  description: String
+
+  """
+  The version you last read. If the job changed since, the update is rejected.
+  """
+  expectedVersion: Int
+  status: JobStatus
 }
 
 type User {
