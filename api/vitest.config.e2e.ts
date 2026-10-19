@@ -1,3 +1,5 @@
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { defineConfig } from 'vitest/config';
 import { TEST_DATABASE_URL } from './test/support/test-database.js';
 
@@ -13,6 +15,9 @@ export default defineConfig({
       NODE_ENV: 'test',
       DATABASE_URL: TEST_DATABASE_URL,
       JWT_SECRET: 'test-only-secret-0123456789abcdef0123456789',
+      // Separate Redis keys and files, so tests never touch the dev queue or dev reports.
+      QUEUE_PREFIX: 'test',
+      REPORTS_DIR: join(tmpdir(), 'home-renovation-test-reports'),
     },
     // All e2e files share one database, so run them one at a time.
     fileParallelism: false,
