@@ -25,7 +25,8 @@ pnpm --filter api migration:run
 pnpm --filter api seed            # demo users, jobs, history and 5,000 messages
 ```
 
-Then, in three terminals (start the API first: it compiles the code the worker runs):
+Then, in three terminals, in any order (the worker runs the code the API compiles, and waits for
+it on a fresh clone):
 
 ```bash
 pnpm dev:api      # GraphQL API and GraphiQL on http://localhost:4000/graphql

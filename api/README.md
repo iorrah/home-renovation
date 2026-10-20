@@ -28,7 +28,8 @@ Then, from this package, apply migrations, load the demo data and start the API:
 
 The GraphQL endpoint is available at http://localhost:4000/graphql.
 
-To process report jobs, run the worker in a second terminal (after `start:dev`, which builds `dist/`):
+To process report jobs, run the worker in a second terminal. It runs the code `start:dev` compiles
+into `dist/`, waits for it on a fresh clone, and restarts when its files change:
 
     pnpm worker:dev
 
@@ -38,7 +39,7 @@ To process report jobs, run the worker in a second terminal (after `start:dev`, 
 | --- | --- |
 | `pnpm start:dev` | API with reload, on http://localhost:4000/graphql |
 | `pnpm start:debug` | API with reload and the Node debugger attached |
-| `pnpm worker:dev` | Report worker with reload (run `start:dev` first; it builds `dist/`) |
+| `pnpm worker:dev` | Report worker with reload (runs what `start:dev` compiles into `dist/`) |
 | `pnpm build` | Compile the project to `dist/` |
 | `pnpm start:prod` | Run the compiled API |
 | `pnpm start:worker` | Run the compiled report worker |
