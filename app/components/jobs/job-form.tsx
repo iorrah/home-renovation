@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -126,7 +126,6 @@ export function JobForm({
                 </Select>
               )}
             />
-            <FieldDescription>Only the moves the workflow allows are listed.</FieldDescription>
           </Field>
         )}
         <div className="flex gap-2">

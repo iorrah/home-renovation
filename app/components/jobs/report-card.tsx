@@ -68,8 +68,7 @@ export function ReportCard({ jobId }: { jobId: string }) {
           <FileTextIcon className="size-5" /> Report
         </CardTitle>
         <CardDescription>
-          A PDF with the job details, its full history and every message. Large jobs take a while;
-          it is built in the background.
+          Export a PDF with the job details, its full history and every message.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap items-center gap-3">

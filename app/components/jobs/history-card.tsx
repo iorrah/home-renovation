@@ -61,11 +61,7 @@ export function HistoryCard({ job, canEdit }: { job: Job; canEdit: boolean }) {
         <CardTitle className="flex items-center gap-2 text-lg">
           <HistoryIcon className="size-5" /> History
         </CardTitle>
-        <CardDescription>
-          {canEdit
-            ? 'Every change to this job. Undo and redo apply to edits.'
-            : 'Every change to this job.'}
-        </CardDescription>
+        <CardDescription>Every change to this job.</CardDescription>
         {canEdit && (
           <CardAction className="flex gap-2">
             <Button

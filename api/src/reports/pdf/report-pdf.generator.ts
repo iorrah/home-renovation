@@ -78,7 +78,7 @@ export class ReportPdfGenerator {
       ['Current cost', formatCents(job.costCents)],
       ['Contractor', job.contractor.username],
       ['Homeowners', homeowners.map((h) => h.username).join(', ') || 'None'],
-      ['Created', formatDate(job.createdAt)],
+      ['Job Created', formatDate(job.createdAt)],
     ];
     if (job.deletedAt) rows.push(['Deleted', formatDate(job.deletedAt)]);
     for (const [label, value] of rows) {
