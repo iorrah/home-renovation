@@ -12,7 +12,7 @@ A full-stack monorepo where contractors and homeowners collaborate on renovation
 **Stack:** Node 24, TypeScript, NestJS 12, GraphQL (Apollo, code-first), PostgreSQL 18 with
 TypeORM 1, Redis 8 with BullMQ, Next.js 16 with TanStack Query, Tailwind and shadcn/ui.
 
-## Run it
+## Setup & Run Instructions
 
 You need Node 24.15+ (`nvm use`), pnpm 12.9 (`corepack enable`) and Docker.
 
@@ -70,21 +70,22 @@ flowchart LR
   through Redis rather than process memory, a message sent through one API instance reaches
   subscribers on every instance (an e2e test runs two instances to prove it).
 
-## Using the API
+## API usage examples
 
-Open GraphiQL at http://localhost:4000/graphql, or log in with curl:
+The API is at http://localhost:4000/graphql. Use GraphiQL (open that URL in a browser), Postman,
+or curl. All examples below were run against the seeded database.
 
-```bash
-curl -s http://localhost:4000/graphql -H 'Content-Type: application/json' \
-  -d '{"query":"mutation { login(input: {username: \"carlos\", password: \"password123\"}) { accessToken } }"}'
-```
+### Authentication
 
-Send the token as `Authorization: Bearer <token>` on every other request (in GraphiQL, under
-Headers). For subscriptions, send `{ "authorization": "Bearer <token>" }` in the WebSocket
-`connectionParams`.
+Log in, then send the token as `Authorization: Bearer <token>` on every other request (in
+GraphiQL, under Headers). Subscriptions run over a WebSocket, which cannot carry headers, so they
+send `{ "authorization": "Bearer <token>" }` in the connection payload (`connectionParams`).
+
+### Operations
 
 | Operation                                      | Who        | What it does                                                        |
 | ---------------------------------------------- | ---------- | ------------------------------------------------------------------- |
+| `login(input)`                                 | anyone     | Returns an access token valid for one hour                          |
 | `jobs`, `job(id)`                              | both roles | Contractors see their jobs; homeowners see the jobs they are on     |
 | `createJob`, `updateJob`, `deleteJob`          | contractor | `updateJob` takes `expectedVersion`; deleting is a soft delete      |
 | `addHomeowner`, `removeHomeowner`              | contractor | Manage who can see a job                                            |
@@ -98,7 +99,160 @@ Headers). For subscriptions, send `{ "authorization": "Bearer <token>" }` in the
 Errors carry a stable `extensions.code`: `UNAUTHENTICATED`, `FORBIDDEN`, `NOT_FOUND`,
 `BAD_REQUEST` (with field `details`), or `CONFLICT`.
 
-## Key decisions
+### Walkthrough with curl
+
+Paste this into a terminal (bash or zsh) while the API and worker are running. It creates a job,
+edits it, undoes and redoes the edit, reads the history, sends a message and downloads the PDF.
+
+```bash
+API=http://localhost:4000
+
+# Log in as a contractor and keep the access token.
+TOKEN=$(curl -s "$API/graphql" -H 'Content-Type: application/json' \
+  -d '{"query":"mutation { login(input: { username: \"carlos\", password: \"password123\" }) { accessToken } }"}' \
+  | sed -E 's/.*"accessToken":"([^"]+)".*/\1/')
+
+# gql '<operation>' [id]: sends one GraphQL operation as that user; the id (default $JOB_ID)
+# is passed as the $id variable.
+gql() {
+  curl -s "$API/graphql" -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" \
+    -d "{\"query\":\"$1\",\"variables\":{\"id\":\"${2:-$JOB_ID}\"}}"
+  echo
+}
+
+# Create a job ($1,500.00 is 150000 cents) and keep its id.
+JOB_ID=$(gql 'mutation { createJob(input: { description: \"New deck\", address: \"9 Oak Ave\", costCents: 150000 }) { id } }' \
+  | sed -E 's/.*"id":"([^"]+)".*/\1/')
+
+# List your jobs.
+gql '{ jobs { id description status costCents version } }'
+
+# Add a homeowner.
+gql 'mutation ($id: ID!) { addHomeowner(jobId: $id, username: \"hannah\") { homeowners { username } } }'
+
+# Edit the job. expectedVersion is the version you last read; a stale one returns CONFLICT.
+gql 'mutation ($id: ID!) { updateJob(id: $id, input: { costCents: 175000, status: IN_PROGRESS, expectedVersion: 1 }) { status costCents version } }'
+gql 'mutation ($id: ID!) { updateJob(id: $id, input: { costCents: 180000, expectedVersion: 1 }) { version } }'
+
+# Undo the edit, then redo it.
+gql 'mutation ($id: ID!) { undoJobChange(jobId: $id) { status costCents canUndo canRedo } }'
+gql 'mutation ($id: ID!) { redoJobChange(jobId: $id) { status costCents canUndo canRedo } }'
+
+# Read the history (homeowners on the job can read it too).
+gql 'query ($id: ID!) { jobHistory(jobId: $id) { changeNumber type state summary responsibleUser { username } } }'
+
+# Send a message, then read the latest messages.
+gql 'mutation ($id: ID!) { sendMessage(input: { jobId: $id, body: \"Materials arrive Monday\" }) { id body } }'
+gql 'query ($id: ID!) { messages(jobId: $id, limit: 10) { body author { username } createdAt } }'
+
+# Request the PDF report. The worker builds it in the background; poll until DONE.
+EXPORT_ID=$(gql 'mutation ($id: ID!) { requestReport(jobId: $id) { id } }' | sed -E 's/.*"id":"([^"]+)".*/\1/')
+sleep 2
+gql 'query ($id: ID!) { reportExport(id: $id) { status downloadPath } }' "$EXPORT_ID"
+
+# Download it (the one REST route).
+curl -s -o job-report.pdf -H "Authorization: Bearer $TOKEN" "$API/reports/$EXPORT_ID/file"
+```
+
+Some of the responses:
+
+```jsonc
+// updateJob
+{"data":{"updateJob":{"status":"IN_PROGRESS","costCents":175000,"version":2}}}
+
+// updateJob again with the stale expectedVersion: 1
+{"errors":[{"message":"The job changed since you loaded it (version 1, now 2). Reload and try again.",
+  "extensions":{"code":"CONFLICT"}}],"data":null}
+
+// undoJobChange
+{"data":{"undoJobChange":{"status":"PLANNING","costCents":150000,"canUndo":false,"canRedo":true}}}
+
+// jobHistory (first entries)
+{"data":{"jobHistory":[
+  {"changeNumber":1,"type":"CREATE","state":null,"summary":"status: PLANNING; address: 9 Oak Ave; cost: $1,500.00; description: New deck","responsibleUser":{"username":"carlos"}},
+  {"changeNumber":2,"type":"HOMEOWNER_ADDED","state":null,"summary":"homeowner: hannah","responsibleUser":{"username":"carlos"}},
+  {"changeNumber":3,"type":"UPDATE","state":"APPLIED","summary":"status: PLANNING -> IN_PROGRESS; cost: $1,500.00 -> $1,750.00","responsibleUser":{"username":"carlos"}},
+  {"changeNumber":4,"type":"UNDO","state":null,"summary":"status: IN_PROGRESS -> PLANNING; cost: $1,750.00 -> $1,500.00","responsibleUser":{"username":"carlos"}}
+]}}
+```
+
+### GraphQL operations for GraphiQL or Postman
+
+Paste an operation into the editor and its variables into the Variables panel.
+
+```graphql
+mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    accessToken
+    user { id username role }
+  }
+}
+# Variables: { "input": { "username": "carlos", "password": "password123" } }
+
+query Job($id: ID!) {
+  job(id: $id) {
+    id description address status costCents version canUndo canRedo
+    contractor { username }
+    homeowners { username }
+  }
+}
+
+mutation UpdateJob($id: ID!, $input: UpdateJobInput!) {
+  updateJob(id: $id, input: $input) { id status costCents version }
+}
+# Variables: { "id": "<job id>", "input": { "costCents": 250000, "status": "IN_PROGRESS", "expectedVersion": 1 } }
+
+mutation Undo($jobId: ID!) {
+  undoJobChange(jobId: $jobId) { costCents version canUndo canRedo }
+}
+
+query History($jobId: ID!) {
+  jobHistory(jobId: $jobId) {
+    changeNumber type state summary createdAt
+    responsibleUser { username }
+  }
+}
+
+mutation RequestReport($jobId: ID!) {
+  requestReport(jobId: $jobId) { id status }
+}
+
+query ReportStatus($id: ID!) {
+  reportExport(id: $id) { status downloadPath error }
+}
+
+# Real-time: keep this running in one tab, then send a message from another
+# (log in as hannah there to see it arrive from a different user).
+subscription Messages($jobId: ID!) {
+  messageAdded(jobId: $jobId) {
+    body createdAt
+    author { username role }
+  }
+}
+```
+
+GraphiQL cannot send `connectionParams`, so it runs queries and mutations but not the
+authenticated subscription. For that, use Postman (below) or the web app.
+
+### Postman
+
+- **Queries and mutations:** create a GraphQL request to `http://localhost:4000/graphql`. Postman
+  reads the schema from the API, so you can browse the operations. Set **Authorization** to
+  *Bearer Token* with the token from `login`.
+- **The subscription:** create a WebSocket request to `ws://localhost:4000/graphql` with the
+  header `Sec-WebSocket-Protocol: graphql-transport-ws`, connect, then send these two messages in
+  order. The first authenticates the connection; after the server answers `connection_ack`, the
+  second subscribes, and each new message on the job arrives as a `next` message.
+
+```json
+{ "type": "connection_init", "payload": { "authorization": "Bearer <token>" } }
+```
+
+```json
+{ "id": "1", "type": "subscribe", "payload": { "query": "subscription { messageAdded(jobId: \"<job id>\") { body author { username } } }" } }
+```
+
+## Key assumptions
 
 - **History as a change log with undo states.** `jobs` holds the current state; `job_changes`
   is an append-only log, numbered per job, that stores only the changed fields as
@@ -142,7 +296,7 @@ versions and changes made outside the log), real-time delivery across two API in
 full report export through the real worker. CI runs lint, formatting, typechecks, both test
 suites, a check that entities match the migrations, and a web app build.
 
-## Scope and limitations
+## My scope decisions
 
 - Users are seeded: no sign-up, password reset or refresh tokens. Tokens last an hour.
 - Undo and redo only cover job fields (description, address, status, cost).
@@ -162,7 +316,8 @@ suites, a check that entities match the migrations, and a web app build.
 - **Research:** I used it to explore the problem space and the technology options.
 - **Planning:** I used it to criticize / find gaps in my plan and to break large features into small tasks.
 - **Review:** I used it to challenge my technical decisions.
-- **Writing:** I used it to produce boilerplate, tests, PR descriptions and documentation.
+- **Writing:** I used it to produce boilerplate, features, tests, PR descriptions and documentation.
+- **Troubleshooting:** I used it combined with logs to identify error root cause and come up with proposed solutions.
 
 ## What I decided myself
 
