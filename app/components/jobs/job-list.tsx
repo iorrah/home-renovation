@@ -21,7 +21,9 @@ export function JobList() {
         <div>
           <h1 className="text-2xl font-semibold">Jobs</h1>
           <p className="text-sm text-muted-foreground">
-            {isContractor ? 'The jobs you run.' : 'The renovation jobs you are part of.'}
+            {isContractor
+              ? 'The renovation jobs assigned to you.'
+              : 'The renovation jobs you are part of.'}
           </p>
         </div>
         {isContractor && (

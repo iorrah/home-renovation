@@ -72,6 +72,8 @@ export function LoginForm() {
 
   const { errors } = form.formState;
 
+  const isDevelopmentEnv = process.env.NODE_ENV === 'development';
+
   return (
     <div className="flex w-full max-w-sm flex-col gap-4">
       <Card className="w-full py-12 px-8">
@@ -115,32 +117,36 @@ export function LoginForm() {
         </CardContent>
       </Card>
 
-      <Card className="w-full py-6 px-4 gap-3">
-        <CardHeader className="px-2">
-          <CardTitle className="text-sm font-semibold">Demo accounts</CardTitle>
-        </CardHeader>
-        <CardContent className="px-2">
-          <ul className="flex flex-col divide-y">
-            {DEMO_ACCOUNTS.map((account) => (
-              <li key={account.username} className="flex items-center gap-2 py-2">
-                <span className="text-sm font-medium">{account.username}</span>
-                <span className="text-xs text-muted-foreground">{account.role}</span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="ml-auto size-7"
-                  onClick={() => fillDemoAccount(account)}
-                  aria-label={`Fill login form with ${account.username}`}
-                  title={`Fill login form with ${account.username}`}
-                >
-                  <ClipboardPaste className="size-3.5" aria-hidden="true" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      {isDevelopmentEnv && (
+        <Card className="w-full py-6 px-4 gap-3">
+          <CardHeader className="flex gap-2 px-2">
+            <CardTitle className="text-sm font-semibold">Demo accounts</CardTitle>
+
+            <span className="text-muted-foreground font-normal">(devolment mode)</span>
+          </CardHeader>
+          <CardContent className="px-2">
+            <ul className="flex flex-col divide-y">
+              {DEMO_ACCOUNTS.map((account) => (
+                <li key={account.username} className="flex items-center gap-2 py-2">
+                  <span className="text-sm font-medium">{account.username}</span>
+                  <span className="text-xs text-muted-foreground">{account.role}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="ml-auto size-7"
+                    onClick={() => fillDemoAccount(account)}
+                    aria-label={`Fill login form with ${account.username}`}
+                    title={`Fill login form with ${account.username}`}
+                  >
+                    <ClipboardPaste className="size-3.5" aria-hidden="true" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
