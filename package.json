@@ -7,6 +7,9 @@
   },
   "scripts": {
     "dev:api": "pnpm --filter api start:dev",
+    "dev:worker": "pnpm --filter api worker:dev",
+    "dev:app": "pnpm --filter app dev",
+    "dev": "pnpm dev:api & pnpm dev:worker & pnpm dev:app",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",

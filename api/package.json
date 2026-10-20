@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "build": "nest build",
+    "build": "rm -rf dist && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -27,7 +27,7 @@
     "migration:show": "nest build && typeorm -d dist/database/data-source.js migration:show",
     "seed": "nest build && node dist/database/seed.js",
     "start:worker": "node dist/worker.js",
-    "worker:dev": "node --watch dist/worker.js"
+    "worker:dev": "until [ -f dist/worker.js ]; do sleep 1; done; node --watch dist/worker.js"
   },
   "dependencies": {
     "@apollo/server": "5.5.1",
