@@ -14,7 +14,10 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "infra:up": "docker compose up -d --wait",
-    "infra:down": "docker compose down"
+    "infra:down": "docker compose down",
+    "db:migrate": "pnpm --filter api migration:run",
+    "db:seed": "rm -rf api/storage/reports && pnpm --filter api seed",
+    "db:reset": "docker compose down -v && pnpm infra:up && pnpm db:migrate && pnpm db:seed"
   },
   "keywords": [],
   "author": "",

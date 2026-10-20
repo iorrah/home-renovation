@@ -21,8 +21,8 @@ pnpm install
 cp api/.env.example api/.env
 cp app/.env.example app/.env.local
 pnpm infra:up                     # Postgres, test Postgres and Redis in Docker
-pnpm --filter api migration:run
-pnpm --filter api seed            # demo users, jobs, history and 5,000 messages
+pnpm db:migrate                   # create the tables
+pnpm db:seed                      # demo users, jobs, history and 5,000 messages
 ```
 
 Then, in three terminals, in any order (the worker runs the code the API compiles, and waits for
@@ -36,7 +36,7 @@ pnpm dev:app      # web app on http://localhost:3000
 
 ### Demo accounts
 
-Every password is `password123`. `pnpm --filter api seed` resets the database to this state at any time.
+Every password is `password123`. `pnpm db:seed` resets the database to this state at any time.
 
 | Username | Role       | Jobs                                                                |
 | -------- | ---------- | ------------------------------------------------------------------- |
@@ -45,6 +45,14 @@ Every password is `password123`. `pnpm --filter api seed` resets the database to
 | `hannah` | Homeowner  | Kitchen, Basement                                                   |
 | `henry`  | Homeowner  | Kitchen                                                             |
 | `hugo`   | Homeowner  | Bathroom                                                            |
+
+### Resetting the data
+
+| Command           | What it does                                                                                                                                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm db:seed`    | Empties every table, deletes generated PDFs and loads the demo data again. The schema is kept, and the API and worker can stay running.                                                                                  |
+| `pnpm db:reset`   | Starts from nothing: deletes the Docker volumes (all Postgres and Redis data), starts the containers again, runs the migrations and seeds. Stop the API and worker first. Use it if the schema itself is in a bad state. |
+| `pnpm db:migrate` | Applies any migrations that have not run yet.                                                                                                                                                                            |
 
 ## Architecture
 
