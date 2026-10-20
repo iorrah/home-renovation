@@ -12,12 +12,26 @@ import {
   type ReportStatus,
 } from '@/lib/reports';
 
-const STATUS_TEXT: Record<ReportStatus, string> = {
-  QUEUED: 'Waiting for the report worker…',
+const STATUS_TEXT: Record<Exclude<ReportStatus, 'DONE'>, string> = {
+  QUEUED: 'Requesting report...',
   PROCESSING: 'Building the PDF…',
-  DONE: 'Your report is ready.',
   FAILED: 'The report could not be built.',
 };
+
+function formatGeneratedAt(iso: string): string {
+  const date = new Date(iso);
+  const time = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+  const dateText = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date);
+
+  return `Generated at ${time}, ${dateText}`;
+}
 
 /** Contractor only: builds the full job report (details, history, messages) as a PDF. */
 export function ReportCard({ jobId }: { jobId: string }) {
@@ -74,7 +88,11 @@ export function ReportCard({ jobId }: { jobId: string }) {
               status === 'FAILED' ? 'text-sm text-destructive' : 'text-sm text-muted-foreground'
             }
           >
-            {STATUS_TEXT[status]}
+            {status === 'DONE' && report.data?.updatedAt
+              ? formatGeneratedAt(report.data.updatedAt)
+              : status !== 'DONE'
+                ? STATUS_TEXT[status]
+                : ''}
             {status === 'FAILED' && report.data?.error ? ` ${report.data.error}` : ''}
           </p>
         )}

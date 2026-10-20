@@ -145,8 +145,7 @@ function DeleteJobButton({ jobId }: { jobId: string }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this job?</AlertDialogTitle>
           <AlertDialogDescription>
-            It disappears for you and its homeowners. Its history is kept, but you cannot undo a
-            deletion.
+            It disappears for you and its homeowners. You cannot undo a deletion.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

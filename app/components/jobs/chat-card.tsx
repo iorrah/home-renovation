@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDateTime } from '@/lib/format';
@@ -31,7 +31,7 @@ export function ChatCard({ jobId }: { jobId: string }) {
   const user = useCurrentUser();
   const messages = useMessages(jobId);
   const sendMessage = useSendMessage(jobId);
-  const live = useLiveMessages(jobId);
+  useLiveMessages(jobId);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<MessageValues>({
@@ -58,17 +58,6 @@ export function ChatCard({ jobId }: { jobId: string }) {
         <CardTitle className="flex items-center gap-2 text-lg">
           <MessageSquareIcon className="size-5" /> Messages
         </CardTitle>
-        <CardAction>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span
-              className={cn(
-                'size-2 rounded-full',
-                live ? 'bg-emerald-500' : 'bg-muted-foreground/40',
-              )}
-            />
-            {live ? 'Live' : 'Connecting…'}
-          </span>
-        </CardAction>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="h-[28rem] space-y-3 overflow-y-auto rounded-lg border bg-muted/30 p-3">
@@ -88,7 +77,7 @@ export function ChatCard({ jobId }: { jobId: string }) {
           <div ref={bottomRef} />
         </div>
 
-        <form noValidate onSubmit={send} className="flex items-end gap-2">
+        <form noValidate onSubmit={send} className="flex items-center gap-2">
           <Textarea
             rows={2}
             placeholder="Write a message… (Enter to send, Shift+Enter for a new line)"
@@ -102,7 +91,13 @@ export function ChatCard({ jobId }: { jobId: string }) {
               }
             }}
           />
-          <Button type="submit" size="icon" aria-label="Send" disabled={sendMessage.isPending}>
+          <Button
+            type="submit"
+            size="icon"
+            aria-label="Send"
+            className="p-6"
+            disabled={sendMessage.isPending}
+          >
             <SendIcon />
           </Button>
         </form>
@@ -121,7 +116,7 @@ function ChatMessage({ message, mine }: { message: Message; mine: boolean }) {
       <div
         className={cn(
           'max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap break-words',
-          mine ? 'bg-primary text-primary-foreground' : 'border bg-background',
+          mine ? 'bg-emerald-500 text-primary-foreground' : 'border bg-background',
         )}
       >
         {message.body}

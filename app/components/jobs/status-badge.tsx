@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 const STATUS_STYLES: Record<JobStatus, string> = {
   PLANNING: 'bg-secondary text-secondary-foreground',
-  IN_PROGRESS: 'bg-primary text-primary-foreground',
+  IN_PROGRESS: 'bg-yellow-300 text-dark',
   COMPLETED: 'bg-emerald-100 text-emerald-800',
   CANCELED: 'bg-destructive/10 text-destructive',
 };

@@ -12,9 +12,10 @@ export type ReportExport = {
   status: ReportStatus;
   error: string | null;
   downloadPath: string | null;
+  updatedAt: string;
 };
 
-const REPORT_FIELDS = 'id status error downloadPath';
+const REPORT_FIELDS = 'id status error downloadPath updatedAt';
 const FINISHED: ReportStatus[] = ['DONE', 'FAILED'];
 
 /**

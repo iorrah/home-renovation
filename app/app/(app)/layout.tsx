@@ -18,7 +18,7 @@ export default function AuthenticatedLayout({ children }: LayoutProps<'/'>) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (session === null) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    if (session === null) router.replace(`/login`);
   }, [session, pathname, router]);
 
   if (!session) return <PageLoader />;
@@ -26,7 +26,9 @@ export default function AuthenticatedLayout({ children }: LayoutProps<'/'>) {
   return (
     <>
       <AppHeader user={session.user} />
-      <main className="mx-auto w-full max-w-6xl flex-1 p-4">{children}</main>
+      <main className="bg-gray-50 flex-1">
+        <div className="mx-auto w-full max-w-6xl flex-1 p-4 bg-gray-50">{children}</div>
+      </main>
     </>
   );
 }

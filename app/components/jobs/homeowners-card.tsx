@@ -42,7 +42,7 @@ export function HomeownersCard({ job, canEdit }: { job: Job; canEdit: boolean })
         <CardTitle className="text-lg">Homeowners</CardTitle>
         <CardDescription>
           {canEdit
-            ? 'Homeowners can follow the job, read its history and send messages.'
+            ? 'Homeowners can access the job, read its history and send messages.'
             : 'The homeowners on this job.'}
         </CardDescription>
       </CardHeader>
