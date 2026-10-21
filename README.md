@@ -2,6 +2,13 @@
 
 A full-stack monorepo where contractors and homeowners collaborate on renovation jobs: a NestJS GraphQL API, a background report worker, and a Next.js web app, backed by PostgreSQL and Redis.
 
+<div align="center">
+  <img src="docs/screenshots/03 Job Details.png" alt="Job Details Page" width="100%">
+  <br>
+  <sub>Job Details Page</sub>
+</div>
+
+
 ## Features
 
 - Jobs and their homeowners
