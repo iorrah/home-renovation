@@ -58,7 +58,7 @@ Every password is `password123`. `pnpm db:seed` resets the database to this stat
 
 ```mermaid
 flowchart LR
-  browser[Browser: Next.js app] -- GraphQL over HTTP --> api[NestJS API]
+  browser[Client: Next.js app] -- GraphQL over HTTP --> api[NestJS API]
   browser -- GraphQL subscriptions over WebSocket --> api
   browser -- GET /reports/:id/file --> api
   api --> pg[(PostgreSQL)]

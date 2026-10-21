@@ -122,7 +122,7 @@ export function LoginForm() {
           <CardHeader className="flex gap-2 px-2">
             <CardTitle className="text-sm font-semibold">Demo accounts</CardTitle>
 
-            <span className="text-muted-foreground font-normal">(devolment mode)</span>
+            <span className="text-muted-foreground font-normal">(develoment mode)</span>
           </CardHeader>
           <CardContent className="px-2">
             <ul className="flex flex-col divide-y">

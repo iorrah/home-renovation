@@ -11,7 +11,6 @@ import { HistoryCard } from './history-card';
 import { HomeownersCard } from './homeowners-card';
 import { JobDetailsCard } from './job-details-card';
 import { ReportCard } from './report-card';
-import { StatusBadge } from './status-badge';
 
 /**
  * Two columns on wide screens: the job on the left, the conversation on the right, so the live
@@ -52,10 +51,8 @@ export function JobPage({ jobId }: { jobId: string }) {
   return (
     <div className="space-y-4">
       <BackLink />
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold">{job.data.description}</h1>
-        <StatusBadge status={job.data.status} />
-      </div>
+      <h1 className="text-2xl font-semibold">{job.data.description}</h1>
+
       <div className="grid items-start gap-6 lg:grid-cols-[3fr_2fr]">
         <div className="space-y-6">
           <JobDetailsCard job={job.data} canEdit={canEdit} />
