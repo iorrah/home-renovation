@@ -10,6 +10,24 @@ The frontend for the Home Renovation platform, where contractors manage renovati
 - Chat in real time with the homeowner on a project
 - Export PDF reports
 
+## Screenshots
+
+### Login
+
+![Login page with username and password fields](../docs/screenshots/01%20Login.png)
+
+### Jobs
+
+![Jobs list for a contractor, showing each job's status, address, cost and homeowners](../docs/screenshots/02%20Jobs.png)
+
+### Job details
+
+![Job details page with details, homeowners, report export and history on the left, and the live chat on the right](../docs/screenshots/03%20Job%20Details.png)
+
+### New job
+
+![New job form with description, address and cost fields](../docs/screenshots/04%20Add%20Job.png)
+
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router), React 19, TypeScript
